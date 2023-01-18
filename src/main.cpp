@@ -1,38 +1,9 @@
 #include "main.hpp"
 #include "Config.hpp"
-
-#include "GlobalNamespace/PracticeViewController.hpp"
-#include "GlobalNamespace/IBeatmapLevel.hpp"
-#include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
-#include "GlobalNamespace/BeatmapDifficulty.hpp"
-
-using namespace GlobalNamespace;
-
-MAKE_HOOK_MATCH(PracticeViewController_Init, &PracticeViewController::Init, void, PracticeViewController* self, GlobalNamespace::IBeatmapLevel* level, GlobalNamespace::BeatmapCharacteristicSO* beatmapCharacteristic, GlobalNamespace::BeatmapDifficulty beatmapDifficulty)
-{
-    PracticeViewController_Init(self, level, beatmapCharacteristic, beatmapDifficulty);
-
-    auto diff = PracticeAddons::Config::GetLevelInfo(    
-        static_cast<std::string>(level->i_IPreviewBeatmapLevel()->get_levelID()),
-        static_cast<std::string>(beatmapCharacteristic->serializedName),
-        std::to_string(beatmapDifficulty)
-    );
-    getLogger().info("%i, %f, %f", diff.speedValue, diff.startValue, diff.resetValue);
-}
-
-MAKE_HOOK_MATCH(PracticeViewController_DidDeactivate, &PracticeViewController::DidDeactivate, void, PracticeViewController* self, bool removedFromHierarchy, bool screenSystemDisabling)
-{
-    PracticeViewController_DidDeactivate(self, removedFromHierarchy, screenSystemDisabling);
-
-    PracticeAddons::Config::Difficulty diff;
-    diff.speedValue = 40;
-    diff.startValue = 31.58f;
-    diff.resetValue = 79.42f;
-    PracticeAddons::Config::SaveLevelInfo(diff);
-}
+#include "Hooks/PracticeViewController.hpp"
+#include "Hooks/RestartHooks.hpp"
 
 static ModInfo modInfo;
-
 
 Configuration& getConfig() {
     static Configuration config(modInfo);
@@ -61,7 +32,7 @@ extern "C" void load() {
     PracticeAddons::Config::Init();
 
     getLogger().info("Installing hooks...");
-    INSTALL_HOOK(getLogger(), PracticeViewController_Init);
-    INSTALL_HOOK(getLogger(), PracticeViewController_DidDeactivate);
+    PracticeAddons::Hooks::InstallPracticeViewControllerHooks();
+    PracticeAddons::Hooks::InstallRestartHooks();
     getLogger().info("Installed all hooks!");
 }

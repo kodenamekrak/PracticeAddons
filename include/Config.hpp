@@ -4,7 +4,7 @@
 namespace PracticeAddons::Config {
 
     DECLARE_JSON_CLASS(Difficulty,
-        VALUE_DEFAULT(int, speedValue, 100);
+        VALUE_DEFAULT(float, speedValue, 1.0f);
         VALUE_DEFAULT(float, startValue, 0.0f);
         VALUE_DEFAULT(float, resetValue, 0.0f);
     );
@@ -30,6 +30,8 @@ namespace PracticeAddons::Config {
     void Init();
 
     Difficulty GetLevelInfo(std::string levelId, std::string characteristic, std::string difficulty);
+
+    Difficulty GetCurrentLevelInfo();
 
     void SaveLevelInfo(Difficulty difficulty);
 }

@@ -7,6 +7,7 @@ const std::string configPath = "/sdcard/moddata/com.beatgames.beatsaber/mods/Pra
 
 PracticeAddons::Config::Levels levels;
 PracticeAddons::Config::Difficulty* currentDifficulty;
+std::string currentLevelId;
 
 namespace PracticeAddons::Config {
 
@@ -24,6 +25,7 @@ namespace PracticeAddons::Config {
 
     Difficulty GetLevelInfo(std::string levelId, std::string characteristic, std::string difficulty)
     {
+        currentLevelId = levelId;
         bool exists = levels.levels[levelId].characteristics[characteristic].difficulties.contains(difficulty);
         currentDifficulty = &levels.levels[levelId].characteristics[characteristic].difficulties[difficulty];
 
@@ -36,6 +38,11 @@ namespace PracticeAddons::Config {
         else
             getLogger().info("Does not have value for level id '%s'", levelId.c_str());
         return diff;
+    }
+
+    Difficulty GetCurrentLevelInfo() 
+    {
+        return *currentDifficulty;
     }
 
     void SaveLevelInfo(Difficulty difficulty)
