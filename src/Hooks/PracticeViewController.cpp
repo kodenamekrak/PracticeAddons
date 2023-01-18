@@ -34,8 +34,6 @@ MAKE_HOOK_MATCH(PracticeViewController_Init, &PracticeViewController::Init, void
     self->practiceSettings->songSpeedMul = values.speedValue;
     self->practiceSettings->startSongTime = values.startValue;
 
-    float volume =  self->perceivedLoudnessPerLevelModel->GetLoudnessCorrectionByLevelId(level->i_IPreviewBeatmapLevel()->get_levelID());
-    SliderManager::SetPreview(level->get_beatmapLevelData()->get_audioClip(), volume);
 }
 
 MAKE_HOOK_MATCH(PracticeViewController_DidActivate, &GlobalNamespace::PracticeViewController::DidActivate, void, GlobalNamespace::PracticeViewController* self, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -47,6 +45,18 @@ MAKE_HOOK_MATCH(PracticeViewController_DidActivate, &GlobalNamespace::PracticeVi
         auto rect = self->playButton->GetComponent<UnityEngine::RectTransform*>();
         rect->set_anchoredPosition({rect->get_anchoredPosition().x, -67});
     }
+    auto values = Config::GetLevelInfo(    
+        static_cast<std::string>(self->level->i_IPreviewBeatmapLevel()->get_levelID()),
+        static_cast<std::string>(self->beatmapCharacteristic->serializedName),
+        std::to_string(self->beatmapDifficulty)
+    );
+    self->practiceSettings->songSpeedMul = values.speedValue;
+    self->practiceSettings->startSongTime = values.startValue;
+
+    getLogger().info("Getting values for level '%s'\n%f, %f, %f", static_cast<std::string>(self->level->i_IPreviewBeatmapLevel()->get_levelID()).c_str(), values.startValue, values.speedValue, values.resetValue);
+
+    float volume =  self->perceivedLoudnessPerLevelModel->GetLoudnessCorrectionByLevelId(self->level->i_IPreviewBeatmapLevel()->get_levelID());
+    SliderManager::SetPreview(self->level->get_beatmapLevelData()->get_audioClip(), volume);
     SliderManager::HandleSliderValues(self->speedSlider, self->songStartSlider);
 }
 
@@ -58,13 +68,14 @@ MAKE_HOOK_MATCH(PracticeViewController_DidDeactivate, &PracticeViewController::D
     diff.speedValue = self->speedSlider->get_value();
     diff.startValue = self->songStartSlider->get_value();
     diff.resetValue = SliderManager::GetSliderValue();
+    getLogger().info("Saving values for level '%s'\n%f, %f, %f", static_cast<std::string>(self->level->i_IPreviewBeatmapLevel()->get_levelID()).c_str(), diff.startValue, diff.speedValue, diff.resetValue);
     Config::SaveLevelInfo(diff);
 }
 
 namespace PracticeAddons::Hooks {
     void InstallPracticeViewControllerHooks()
     {
-        INSTALL_HOOK(getLogger(), PracticeViewController_Init);
+        // INSTALL_HOOK(getLogger(), PracticeViewController_Init);
         INSTALL_HOOK(getLogger(), PracticeViewController_DidDeactivate);
         INSTALL_HOOK(getLogger(), PracticeViewController_DidActivate);
     }

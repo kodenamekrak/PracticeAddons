@@ -58,19 +58,21 @@ namespace PracticeAddons::SliderManager {
         // rect->set_anchoredPosition({rect->get_anchoredPosition().x, -67});
 
 
-        restartSlider->add_valueDidChangeEvent(custom_types::MakeDelegate<System::Action_2<HMUI::RangeValuesTextSlider* , float>*>(std::function(PlayPreview)));
+        restartSlider->valueDidChangeEvent = custom_types::MakeDelegate<System::Action_2<HMUI::RangeValuesTextSlider* , float>*>(std::function(PlayPreview));
     }
     
     void HandleSliderValues(HMUI::PercentSlider* speedSlider, HMUI::TimeSlider* startSlider)
     {
         auto values = Config::GetCurrentLevelInfo();
 
+        getLogger().info("Values for current pointer are \n%f, %f, %f", values.startValue, values.speedValue, values.resetValue);
+
         speedSlider->set_value(values.speedValue);
         startSlider->set_value(values.startValue);
-        restartSlider->set_value(values.resetValue);
 
         restartSlider->set_maxValue(startSlider->get_maxValue() - 1);
         restartSlider->set_numberOfSteps(startSlider->get_numberOfSteps());
+        restartSlider->set_value(values.resetValue);
     }
 
     float GetSliderValue()
