@@ -14,8 +14,10 @@ bool isPractice, shouldReset;
 MAKE_HOOK_MATCH(AudioTimeSyncController_Update, &GlobalNamespace::AudioTimeSyncController::Update, void, GlobalNamespace::AudioTimeSyncController* self)
 {
     AudioTimeSyncController_Update(self);
+    if(!isPractice || !shouldReset)
+        return;
     auto values = PracticeAddons::Config::GetCurrentLevelInfo();
-    if(shouldReset && isPractice && values.resetValue > 1 && values.resetValue > values.startValue && self->songTime > values.resetValue)
+    if(values.resetValue > 1 && values.resetValue > values.startValue && self->songTime > values.resetValue)
     {
         auto pauseController = UnityEngine::Resources::FindObjectsOfTypeAll<GlobalNamespace::PauseController*>().First();
         pauseController->levelRestartController->RestartLevel();

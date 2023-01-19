@@ -19,23 +19,6 @@
 using namespace GlobalNamespace;
 using namespace PracticeAddons;
 
-MAKE_HOOK_MATCH(PracticeViewController_Init, &PracticeViewController::Init, void, PracticeViewController* self, GlobalNamespace::IBeatmapLevel* level, GlobalNamespace::BeatmapCharacteristicSO* beatmapCharacteristic, GlobalNamespace::BeatmapDifficulty beatmapDifficulty)
-{
-    PracticeViewController_Init(self, level, beatmapCharacteristic, beatmapDifficulty);
-
-    // something is fucking up here with the config
-    // probably because pointers ????
-    auto values = Config::GetLevelInfo(    
-        static_cast<std::string>(level->i_IPreviewBeatmapLevel()->get_levelID()),
-        static_cast<std::string>(beatmapCharacteristic->serializedName),
-        std::to_string(beatmapDifficulty)
-    );
-    getLogger().info("Values for level '%s' are %f, %f, %f", static_cast<std::string>(level->i_IPreviewBeatmapLevel()->get_levelID()).c_str(), values.speedValue, values.startValue, values.resetValue);
-    self->practiceSettings->songSpeedMul = values.speedValue;
-    self->practiceSettings->startSongTime = values.startValue;
-
-}
-
 MAKE_HOOK_MATCH(PracticeViewController_DidActivate, &GlobalNamespace::PracticeViewController::DidActivate, void, GlobalNamespace::PracticeViewController* self, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
 {
     PracticeViewController_DidActivate(self, firstActivation, addedToHierarchy, screenSystemEnabling);
@@ -53,8 +36,6 @@ MAKE_HOOK_MATCH(PracticeViewController_DidActivate, &GlobalNamespace::PracticeVi
     self->practiceSettings->songSpeedMul = values.speedValue;
     self->practiceSettings->startSongTime = values.startValue;
 
-    getLogger().info("Getting values for level '%s'\n%f, %f, %f", static_cast<std::string>(self->level->i_IPreviewBeatmapLevel()->get_levelID()).c_str(), values.startValue, values.speedValue, values.resetValue);
-
     float volume =  self->perceivedLoudnessPerLevelModel->GetLoudnessCorrectionByLevelId(self->level->i_IPreviewBeatmapLevel()->get_levelID());
     SliderManager::SetPreview(self->level->get_beatmapLevelData()->get_audioClip(), volume);
     SliderManager::HandleSliderValues(self->speedSlider, self->songStartSlider);
@@ -68,14 +49,12 @@ MAKE_HOOK_MATCH(PracticeViewController_DidDeactivate, &PracticeViewController::D
     diff.speedValue = self->speedSlider->get_value();
     diff.startValue = self->songStartSlider->get_value();
     diff.resetValue = SliderManager::GetSliderValue();
-    getLogger().info("Saving values for level '%s'\n%f, %f, %f", static_cast<std::string>(self->level->i_IPreviewBeatmapLevel()->get_levelID()).c_str(), diff.startValue, diff.speedValue, diff.resetValue);
     Config::SaveLevelInfo(diff);
 }
 
 namespace PracticeAddons::Hooks {
     void InstallPracticeViewControllerHooks()
     {
-        // INSTALL_HOOK(getLogger(), PracticeViewController_Init);
         INSTALL_HOOK(getLogger(), PracticeViewController_DidDeactivate);
         INSTALL_HOOK(getLogger(), PracticeViewController_DidActivate);
     }

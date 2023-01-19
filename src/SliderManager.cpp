@@ -9,6 +9,9 @@
 #include "HMUI/TimeSlider.hpp"
 #include "HMUI/RangeValuesTextSlider.hpp"
 
+#include "UnityEngine/Resources.hpp"
+#include "UnityEngine/RectTransform.hpp"
+
 #include "System/Action_2.hpp"
 
 #include "custom-types/shared/delegate.hpp"
@@ -39,6 +42,7 @@ namespace PracticeAddons::SliderManager {
     void CreateSlider(UnityEngine::Transform* parent)
     {
         auto slider = QuestUI::BeatSaberUI::CreateSliderSetting(parent, "", 1, 5, 0, 10, 0.01f);
+        // auto slider = BSML::Lite::CreateSliderSetting(parent, "", 1, 5, 0, 10, 0.01f);
         slider->FormatString = std::move([](float value)
         {
             int m = value / 60;
@@ -48,15 +52,9 @@ namespace PracticeAddons::SliderManager {
         });
         restartSlider = slider->slider;
 
-        // Need to set position and size and stuff
-
         auto resetTrans = restartSlider->GetComponent<UnityEngine::RectTransform*>();
         resetTrans->set_sizeDelta({110, 3});
         resetTrans->set_anchoredPosition({-25, -57});
-
-        // auto rect = self->playButton->GetComponent<UnityEngine::RectTransform*>();
-        // rect->set_anchoredPosition({rect->get_anchoredPosition().x, -67});
-
 
         restartSlider->valueDidChangeEvent = custom_types::MakeDelegate<System::Action_2<HMUI::RangeValuesTextSlider* , float>*>(std::function(PlayPreview));
     }
@@ -64,8 +62,6 @@ namespace PracticeAddons::SliderManager {
     void HandleSliderValues(HMUI::PercentSlider* speedSlider, HMUI::TimeSlider* startSlider)
     {
         auto values = Config::GetCurrentLevelInfo();
-
-        getLogger().info("Values for current pointer are \n%f, %f, %f", values.startValue, values.speedValue, values.resetValue);
 
         speedSlider->set_value(values.speedValue);
         startSlider->set_value(values.startValue);

@@ -29,15 +29,10 @@ namespace PracticeAddons::Config {
         bool exists = levels.levels[levelId].characteristics[characteristic].difficulties.contains(difficulty);
         currentDifficulty = &levels.levels[levelId].characteristics[characteristic].difficulties[difficulty];
 
-        Difficulty diff;
-        if(exists)
-        {
-            diff = *currentDifficulty;
-            getLogger().info("Has value for level id '%s'", levelId.c_str());
-        }
-        else
-            getLogger().info("Does not have value for level id '%s'", levelId.c_str());
-        return diff;
+        if(!exists)
+            *currentDifficulty = Difficulty();
+
+        return *currentDifficulty;
     }
 
     Difficulty GetCurrentLevelInfo() 
