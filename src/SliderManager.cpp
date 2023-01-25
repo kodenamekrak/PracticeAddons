@@ -57,6 +57,7 @@ namespace PracticeAddons::SliderManager {
         resetTrans->set_anchoredPosition({-25, -57});
 
         restartSlider->valueDidChangeEvent = custom_types::MakeDelegate<System::Action_2<HMUI::RangeValuesTextSlider* , float>*>(std::function(PlayPreview));
+        QuestUI::BeatSaberUI::CreateText(parent, "Song Restart", {21, -16});
     }
     
     void HandleSliderValues(HMUI::PercentSlider* speedSlider, HMUI::TimeSlider* startSlider)

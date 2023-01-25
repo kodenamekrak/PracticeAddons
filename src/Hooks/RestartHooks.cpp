@@ -6,6 +6,7 @@
 #include "GlobalNamespace/PauseController.hpp"
 #include "GlobalNamespace/ILevelRestartController.hpp"
 #include "GlobalNamespace/SinglePlayerLevelSelectionFlowCoordinator.hpp"
+#include "GlobalNamespace/MultiplayerLevelScenesTransitionSetupDataSO.hpp"
 
 #include "UnityEngine/Resources.hpp"
 
@@ -25,23 +26,24 @@ MAKE_HOOK_MATCH(AudioTimeSyncController_Update, &GlobalNamespace::AudioTimeSyncC
     }
 }
 
-MAKE_HOOK_MATCH(AudioTimeSyncController_Start, &GlobalNamespace::AudioTimeSyncController::Start, void, GlobalNamespace::AudioTimeSyncController* self)
-{
-    AudioTimeSyncController_Start(self);
-    shouldReset = true;
-}
-
 MAKE_HOOK_MATCH(SinglePlayerLevelSelectionFlowCoordinator_StartLevel, &GlobalNamespace::SinglePlayerLevelSelectionFlowCoordinator::StartLevel, void, GlobalNamespace::SinglePlayerLevelSelectionFlowCoordinator* self, System::Action* beforeSceneSwitchCallback, bool practice)
 {
     SinglePlayerLevelSelectionFlowCoordinator_StartLevel(self, beforeSceneSwitchCallback, practice);
     isPractice = practice;
+    shouldReset = true;
+}
+
+MAKE_HOOK_MATCH(MultiplayerLevelScenesTransitionSetupDataSO_Init, &GlobalNamespace::MultiplayerLevelScenesTransitionSetupDataSO::Init, void, GlobalNamespace::MultiplayerLevelScenesTransitionSetupDataSO* self, StringW gameMode, GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel, GlobalNamespace::BeatmapDifficulty beatmapDifficulty, GlobalNamespace::BeatmapCharacteristicSO* beatmapCharacteristic, GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, GlobalNamespace::ColorScheme* overrideColorScheme, GlobalNamespace::GameplayModifiers* gameplayModifiers, GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, GlobalNamespace::PracticeSettings* practiceSettings, bool useTestNoteCutSoundEffects)
+{
+    MultiplayerLevelScenesTransitionSetupDataSO_Init(self, gameMode, previewBeatmapLevel, beatmapDifficulty, beatmapCharacteristic, difficultyBeatmap, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, useTestNoteCutSoundEffects);
+    isPractice = false;
 }
 
 namespace PracticeAddons::Hooks {
     void InstallRestartHooks()
     {
+        INSTALL_HOOK(getLogger(), MultiplayerLevelScenesTransitionSetupDataSO_Init);
         INSTALL_HOOK(getLogger(), AudioTimeSyncController_Update);
-        INSTALL_HOOK(getLogger(), AudioTimeSyncController_Start);
         INSTALL_HOOK(getLogger(), SinglePlayerLevelSelectionFlowCoordinator_StartLevel);
     }
 }
